@@ -1,0 +1,224 @@
+﻿@page "/"
+@using System.Text.Json
+
+<h1>Consulta de Datos</h1>
+
+<div>
+    <label for="idConsulta">ID de Cliente:</label>
+    <input @bind="idConsulta" id="idConsulta" type="text" />
+    <button @onclick="ConsultarDatos">Consultar</button>
+</div>
+
+<br />
+
+@if (clienteDatos == null && string.IsNullOrEmpty(idConsulta))
+{
+    <h3>Ingrese un ID para consultar información.</h3>
+}
+else if (clienteDatos == null)
+{
+    <h3>No se encontró información para el ID ingresado.</h3>
+}
+else
+{
+    <Switch Class="mt-3" Value="agree" Label="Agregar un medicamento?" ValueExpression="() => agree" ValueChanged="SwitchChanged" />
+    <div style="display: flex; justify-content:space-around; margin-top: 20px;">
+        <div>
+            <h2>Cliente:</h2>
+            <h5>@clienteDatos.nombre - @clienteDatos.identificacion</h5>
+            @if (agree)
+            {
+                <br />
+                <div class="mb-3">
+                    <label for="basic-url" class="form-label">Elija el Medicamento a Asignar</label>
+                    <select @bind="newCMedicamento.idmedicamento" class="form-select" aria-label="Default">
+                        <option disabled selected value="0">Medicamento</option>
+                        @foreach (var m in medicamentoAll)
+                        {
+                            <option value="@m.idmedicamento">@m.descripcion</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Ingrese su dosis:</label>
+                    <InputText @bind-Value="dosis" class="form-control" />
+                </div>
+                <Button Color="ButtonColor.Primary" @onclick="AgregarClienteM"> Agregar </Button>
+                <Button Color="ButtonColor.Secondary" @onclick="ToggleSwitch"> Cancelar </Button>
+            }
+        </div>
+        @if (!medicamentoDatos.Any())
+        {
+            <div>
+                <h3>El ususario no tiene medicamentos registrados</h3>
+            </div>
+        }
+        else
+        {
+            <div>
+                <h2>Medicamentos:</h2>
+                @foreach (var cm in clienteMedicamentoDatos)
+                {
+                    @foreach(var m in medicamentoDatos)
+                    {
+                        if(cm.idmedicamento == m.idmedicamento)
+                        {
+                            <div style="display: flex;">
+                                <div style="padding-right: 15px; ">
+                                    <h5>@m.marca - @m.descripcion</h5>
+                                    <h5>@cm.dosis</h5>
+                                </div>
+                                <Button Color="ButtonColor.Danger" @onclick="() => EliminarClienteM(cm)"> Eliminar </Button>
+                            </div>
+                            <br />
+                        }
+                    }
+                }
+            </div>
+        }
+    </div>
+
+}
+
+@code {
+    @inject NavigationManager _navigationManager
+
+    private blCLiente cliente = new();
+    private blClienteMedicamento clienteM = new();
+    private blMedicamento medicamento = new();
+
+    private string idConsulta = string.Empty;
+    private string dosis = string.Empty;
+    private cClienteFarmacia clienteDatos = default!;
+    private cClienteMedicamento newCMedicamento = new();
+    private IEnumerable<cClienteMedicamento> clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
+    private IEnumerable<cMedicamento> medicamentoAll = Enumerable.Empty<cMedicamento>();
+    private IEnumerable<cMedicamento> medicamentoDatos = Enumerable.Empty<cMedicamento>();
+    private bool agree = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = _navigationManager.Uri;
+        var uriParts = new Uri(uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uriParts.Query);
+
+        if (query["CurrentUser"] != null)
+        {
+            var serializedUser = query["CurrentUser"];
+            clienteDatos = JsonSerializer.Deserialize<cClienteFarmacia>(serializedUser);
+
+            await HalfConsulta();
+        }
+
+        
+    }
+
+    private void ReloadPage()
+    {
+        var serializedUser = JsonSerializer.Serialize<cClienteFarmacia>(clienteDatos);
+
+        var parameters = new Dictionary<string, object>
+{
+    { "CurrentUser", serializedUser }
+};
+
+        var uri = _navigationManager.GetUriWithQueryParameters(parameters);
+
+        _navigationManager.NavigateTo(uri, forceLoad: true);
+    }
+
+    private async Task HalfConsulta()
+    {
+        try
+        {
+            if (clienteDatos != null)
+            {
+                // Consulta los datos de cliente medicamento relacionados con el cliente
+                clienteMedicamentoDatos = (await clienteM.getModel()).Where(cm => cm.identificacion == clienteDatos.identificacion);
+
+                // Filtrar medicamentos asociados a las recetas encontradas
+                var medicamentoIds = clienteMedicamentoDatos.Select(cm => cm.idmedicamento);
+                medicamentoAll = await medicamento.getModel();
+                medicamentoDatos = medicamentoAll.Where(m => medicamentoIds.Contains(m.idmedicamento));
+            }
+            else
+            {
+                // Si no se encuentra el cliente, limpiar los datos
+                clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
+                medicamentoDatos = Enumerable.Empty<cMedicamento>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error durante la consulta: {ex.Message}");
+        }
+    }
+
+    private async Task ConsultarDatos()
+    {
+        try
+        {
+            if (int.TryParse(idConsulta, out int idParsed))
+            {
+                // Consulta los datos de cliente por ID
+                clienteDatos = (await cliente.getModel()).FirstOrDefault(c => c.identificacion == idParsed);
+
+                if (clienteDatos != null)
+                {
+                    // Consulta los datos de cliente medicamento relacionados con el cliente
+                    clienteMedicamentoDatos = (await clienteM.getModel()).Where(cm => cm.identificacion == idParsed);
+
+                    // Filtrar medicamentos asociados a las recetas encontradas
+                    var medicamentoIds = clienteMedicamentoDatos.Select(cm => cm.idmedicamento);
+                    medicamentoAll = await medicamento.getModel();
+                    medicamentoDatos = medicamentoAll.Where(m => medicamentoIds.Contains(m.idmedicamento));
+                }
+                else
+                {
+                    // Si no se encuentra el cliente, limpiar los datos
+                    clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
+                    medicamentoDatos = Enumerable.Empty<cMedicamento>();
+                }
+            }
+            else
+            {
+                Console.WriteLine("El ID ingresado no es válido.");
+                clienteDatos = null;
+                clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
+                medicamentoDatos = Enumerable.Empty<cMedicamento>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error durante la consulta: {ex.Message}");
+        }
+    }
+
+    private async Task AgregarClienteM()
+    {
+        newCMedicamento.identificacion = clienteDatos.identificacion;
+        newCMedicamento.dosis = dosis;
+
+        await clienteM.postModel(newCMedicamento);
+
+        ReloadPage();
+    }
+
+    private async Task EliminarClienteM(cClienteMedicamento cm)
+    {
+        await clienteM.deleteModel(cm);
+        ReloadPage();
+    }
+
+    private void SwitchChanged(bool value)
+    {
+        agree = value;
+    }
+
+    private void ToggleSwitch()
+    {
+        agree = !agree;
+        newCMedicamento = new();
+        dosis = string.Empty;
+    }
+}

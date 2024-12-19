@@ -1,0 +1,246 @@
+﻿@page "/cliente"
+
+<h3>Gestión de Clientes</h3>
+
+@if (listC == null)
+{
+    <p>Cargando clientes...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Identificación</th>
+                <th>Nombre</th>
+                <th>Fecha de Nacimiento</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in listC)
+            {
+                <tr>
+                    <td>@cliente.identificacion</td>
+                    <td>@cliente.nombre</td>
+                    <td>@cliente.fechanacimiento.ToShortDateString()</td>
+                    <td>@cliente.telefono</td>
+                    <td>@cliente.email</td>
+                    <td>@cliente.estado</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => Edit(cliente)">Editar</button>
+                        <ConfirmDialog @ref="dialog" />
+                        <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(cliente)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<hr />
+<h4>@(clienteEditar.identificacion == 0 ? "Agregar Cliente" : "Editar Cliente")</h4>
+
+<EditForm Model="nuevoCliente" OnValidSubmit="@(clienteEditar.identificacion == 0 ? AgregarCliente : ActualizarCliente)">
+    <div>
+        <label>Cédula:</label>
+        <InputText @bind-Value="newid" class="form-control" />
+    </div>
+    <div>
+        <label>Nombre:</label>
+        <InputText @bind-Value="nuevoCliente.nombre" class="form-control" />
+    </div>
+    <div>
+        <label>Fecha de Nacimiento:</label>
+        <InputDate @bind-Value="nuevoCliente.fechanacimiento" class="form-control" />
+    </div>
+    <div>
+        <label>Teléfono:</label>
+        <InputText @bind-Value="nuevoCliente.telefono" class="form-control" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="nuevoCliente.email" class="form-control" />
+    </div>
+    <div>
+        <label>Estado:</label>
+        <InputText @bind-Value="nuevoCliente.estado" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(respuesta))
+{
+    <div class="alert alert-info mt-3">@respuesta</div>
+}
+
+@if (respuesta == "Exito")
+{
+    <div class="alert alert-success mt-3">
+        Cliente agregado exitosamente.
+    </div>
+}
+else if (respuesta == null)
+{
+    <div class="alert alert-danger mt-3">
+        Hubo un error al agregar el cliente.
+    </div>
+}
+
+<!-- Notificación de éxito al agregar cliente -->
+@if (notificacionVisible)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notificación</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" @onclick="() => notificacionVisible = false"></button>
+            </div>
+            <div class="toast-body">
+                ¡Cliente agregado con éxito!
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    @inject NavigationManager _navigationManager
+
+    private blCLiente cliente = new();
+    private blClienteMedicamento clienteM = new();
+    private blMedicamento medicamento = new();
+    private IEnumerable<cClienteFarmacia> listC = default!;
+    private IEnumerable<cClienteMedicamento> listCM = default!;
+    private IEnumerable<cMedicamento> listM = default!;
+    private string? respuesta = "Aqui registra si sucede algo"; // por si pasa algo
+    private cClienteFarmacia clienteAEliminar = new();
+    private bool showDialog = false;
+    private ConfirmDialog dialog = default!;
+    private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
+    private string newid = string.Empty;
+
+    private void ReloadPage()
+    {
+        _navigationManager.Refresh();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            listCM = await clienteM.getModel();
+            listM = await medicamento.getModel();
+            listC = await cliente.getModel();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private async Task ShowConfirmationAsync(cClienteFarmacia item)
+    {
+        var options = new ConfirmDialogOptions
+            {
+                YesButtonText = "Confirmar",
+                YesButtonColor = ButtonColor.Danger,
+                NoButtonText = "Volver",
+                NoButtonColor = ButtonColor.Secondary,
+                IsVerticallyCentered = true
+            };
+
+        var confirmation = await dialog.ShowAsync(
+            title: $"Seguro que desea eliminar al cliente {item.nombre}?",
+            message1: "Esto eliminara su registro. Ya no se podrá recuperar.",
+            message2: "Desea Continuar?",
+            confirmDialogOptions: options
+        );
+
+        if (confirmation)
+        {
+            clienteAEliminar = item;
+            await EliminarCliente();
+        }
+    }
+
+    private cClienteFarmacia nuevoCliente = new();
+
+    private void Edit(cClienteFarmacia data)
+    {
+        clienteEditar = data;
+    }
+
+    private async Task AgregarCliente()
+    {
+        try
+        {
+            nuevoCliente.identificacion = int.Parse(newid);
+            respuesta = await cliente.postModel(nuevoCliente);
+            if (!string.IsNullOrEmpty(respuesta))
+            {
+                // Muestra la notificación de éxito
+                notificacionVisible = true;
+                ReloadPage();
+                Console.WriteLine("Cliente agregado exitosamente.");
+            }
+            else
+            {
+                // Error handling
+                Console.WriteLine("Hubo un error al agregar el cliente.");
+                respuesta = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+            Console.WriteLine($"Error: {ex.Message}");
+            respuesta = null;
+        }
+    }
+
+    private cClienteFarmacia clienteEditar = new();
+
+    private async Task ActualizarCliente()
+    {
+        var respuesta = await cliente.putModel(clienteEditar);
+        if (!string.IsNullOrEmpty(respuesta))
+        {
+            // Mensaje de éxito o redirección
+            Console.WriteLine("Cliente actualizado exitosamente.");
+            clienteEditar = new cClienteFarmacia();
+            ReloadPage();
+        }
+        else
+        {
+            // Manejo de error
+            Console.WriteLine("Hubo un error al actualizar el cliente.");
+        }
+    }
+
+    private async Task EliminarCliente()
+    {
+        var respuesta = await cliente.deleteModel(clienteAEliminar);
+        if (!string.IsNullOrEmpty(respuesta))
+        {
+            // Mensaje de éxito o redirección
+            Console.WriteLine("Cliente eliminado exitosamente.");
+            clienteAEliminar = new cClienteFarmacia();
+            ReloadPage();
+        }
+        else
+        {
+            // Manejo de error
+            Console.WriteLine("Hubo un error al eliminar el cliente.");
+        }
+    }
+
+    private void Cancelar()
+    {
+        // Resetear el formulario o cerrar la página
+        Console.WriteLine("Operación cancelada.");
+    }
+}

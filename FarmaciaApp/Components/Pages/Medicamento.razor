@@ -1,0 +1,206 @@
+﻿@page "/medicamento"
+
+<h3>Gestión de Medicamentos</h3>
+
+@if (listM == null)
+{
+    <p>Cargando medicamentos...</p>
+}
+else
+{
+    <RadzenDataGrid TItem="cMedicamento" Data="@listM" ColumnWidth="200px">
+        <Columns>
+            <RadzenDataGridColumn TItem="cMedicamento" Property="descripcion" Title="Descripción" />
+            <RadzenDataGridColumn TItem="cMedicamento" Property="presentacion" Title="Presentación" />
+            <RadzenDataGridColumn TItem="cMedicamento" Property="marca" Title="Marca" />
+            <RadzenDataGridColumn TItem="cMedicamento" Property="estado" Title="Estado" />
+            <RadzenDataGridColumn TItem="cMedicamento" Context="medicamento">
+                <Template Context="medicamento">
+                    <button class="btn btn-warning btn-sm" @onclick="() => Edit(medicamento)">Editar</button>
+                    <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(medicamento)">Eliminar</button>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+<hr />
+<h4>@(medicamentoEditar.idmedicamento == 0 ? "Agregar Medicamento" : "Editar Medicamento")</h4>
+
+<EditForm Model="nuevoMedicamento" OnValidSubmit="@(medicamentoEditar.idmedicamento == 0 ? AgregarMedicamento : ActualizarMedicamento)">
+    <div>
+        <label>Descripción:</label>
+        <InputText @bind-Value="nuevoMedicamento.descripcion" class="form-control" />
+    </div>
+    <div>
+        <label>Presentación:</label>
+        <InputText @bind-Value="nuevoMedicamento.presentacion" class="form-control" />
+    </div>
+    <div>
+        <label>Marca:</label>
+        <InputText @bind-Value="nuevoMedicamento.marca" class="form-control" />
+    </div>
+    <div>
+        <label>Estado:</label>
+        <InputText @bind-Value="nuevoMedicamento.estado" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(respuesta))
+{
+    <div class="alert alert-info mt-3">@respuesta</div>
+}
+
+@if (respuesta == "Exito")
+{
+    <div class="alert alert-success mt-3">
+        Medicamento agregado exitosamente.
+    </div>
+}
+else if (respuesta == null)
+{
+    <div class="alert alert-danger mt-3">
+        Hubo un error al agregar el medicamento.
+    </div>
+}
+
+<!-- Notificación de éxito al agregar medicamento -->
+@if (notificacionVisible)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notificación</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" @onclick="() => notificacionVisible = false"></button>
+            </div>
+            <div class="toast-body">
+                ¡Medicamento agregado con éxito!
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    @inject NavigationManager _navigationManager
+
+    private blMedicamento medicamento = new();
+    private IEnumerable<cMedicamento> listM = default!;
+    private string? respuesta = "Aquí registra si sucede algo";
+    private cMedicamento medicamentoAEliminar = new();
+    private bool showDialog = false;
+    private ConfirmDialog dialog = default!;
+    private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
+
+    private void ReloadPage()
+    {
+        _navigationManager.Refresh();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            listM = await medicamento.getModel();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private async Task ShowConfirmationAsync(cMedicamento item)
+    {
+        var options = new ConfirmDialogOptions
+        {
+            YesButtonText = "Confirmar",
+            YesButtonColor = ButtonColor.Danger,
+            NoButtonText = "Volver",
+            NoButtonColor = ButtonColor.Secondary,
+            IsVerticallyCentered = true
+        };
+
+        var confirmation = await dialog.ShowAsync(
+            title: $"Seguro que desea eliminar el medicamento {item.descripcion}?",
+            message1: "Esto eliminará su registro. Ya no se podrá recuperar.",
+            message2: "¿Desea continuar?",
+            confirmDialogOptions: options
+        );
+
+        if (confirmation)
+        {
+            medicamentoAEliminar = item;
+            await EliminarMedicamento();
+        }
+    }
+
+    private cMedicamento nuevoMedicamento = new();
+
+    private void Edit(cMedicamento data)
+    {
+        medicamentoEditar = data;
+    }
+
+    private async Task AgregarMedicamento()
+    {
+        try
+        {
+            respuesta = await medicamento.postModel(nuevoMedicamento);
+            if (!string.IsNullOrEmpty(respuesta))
+            {
+                notificacionVisible = true;
+                ReloadPage();
+                Console.WriteLine("Medicamento agregado exitosamente.");
+            }
+            else
+            {
+                respuesta = null;
+                Console.WriteLine("Hubo un error al agregar el medicamento.");
+            }
+        }
+        catch (Exception ex)
+        {
+            respuesta = null;
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private cMedicamento medicamentoEditar = new();
+
+    private async Task ActualizarMedicamento()
+    {
+        var respuesta = await medicamento.putModel(medicamentoEditar);
+        if (!string.IsNullOrEmpty(respuesta))
+        {
+            Console.WriteLine("Medicamento actualizado exitosamente.");
+            medicamentoEditar = new cMedicamento();
+            ReloadPage();
+        }
+        else
+        {
+            Console.WriteLine("Hubo un error al actualizar el medicamento.");
+        }
+    }
+
+    private async Task EliminarMedicamento()
+    {
+        var respuesta = await medicamento.deleteModel(medicamentoAEliminar);
+        if (!string.IsNullOrEmpty(respuesta))
+        {
+            Console.WriteLine("Medicamento eliminado exitosamente.");
+            medicamentoAEliminar = new cMedicamento();
+            ReloadPage();
+        }
+        else
+        {
+            Console.WriteLine("Hubo un error al eliminar el medicamento.");
+        }
+    }
+
+    private void Cancelar()
+    {
+        // Resetear el formulario o cerrar la página
+        Console.WriteLine("Operación cancelada.");
+    }
+}
