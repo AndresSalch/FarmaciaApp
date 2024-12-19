@@ -32,7 +32,6 @@ else
                     <td>@cliente.estado</td>
                     <td>
                         <button class="btn btn-warning btn-sm" @onclick="() => Edit(cliente)">Editar</button>
-                        <ConfirmDialog @ref="dialog" />
                         <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(cliente)">Eliminar</button>
                     </td>
                 </tr>

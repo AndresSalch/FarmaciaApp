@@ -17,6 +17,7 @@ else
             <RadzenDataGridColumn TItem="cMedicamento" Context="medicamento">
                 <Template Context="medicamento">
                     <button class="btn btn-warning btn-sm" @onclick="() => Edit(medicamento)">Editar</button>
+                    <ConfirmDialog @ref="dialog" />
                     <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(medicamento)">Eliminar</button>
                 </Template>
             </RadzenDataGridColumn>

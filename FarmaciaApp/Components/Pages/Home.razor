@@ -15,11 +15,11 @@
 {
     <h3>Ingrese un ID para consultar información.</h3>
 }
-else if (clienteDatos == null)
+else if (nocli)
 {
     <h3>No se encontró información para el ID ingresado.</h3>
 }
-else
+else if (clienteDatos != null)
 {
     <Switch Class="mt-3" Value="agree" Label="Agregar un medicamento?" ValueExpression="() => agree" ValueChanged="SwitchChanged" />
     <div style="display: flex; justify-content:space-around; margin-top: 20px;">
@@ -95,6 +95,7 @@ else
     private IEnumerable<cMedicamento> medicamentoAll = Enumerable.Empty<cMedicamento>();
     private IEnumerable<cMedicamento> medicamentoDatos = Enumerable.Empty<cMedicamento>();
     private bool agree = false;
+    private bool nocli = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,7 +111,7 @@ else
             await HalfConsulta();
         }
 
-        
+
     }
 
     private void ReloadPage()
@@ -158,6 +159,8 @@ else
     {
         try
         {
+            nocli = false;
+
             if (int.TryParse(idConsulta, out int idParsed))
             {
                 // Consulta los datos de cliente por ID
@@ -178,6 +181,7 @@ else
                     // Si no se encuentra el cliente, limpiar los datos
                     clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
                     medicamentoDatos = Enumerable.Empty<cMedicamento>();
+                    nocli = true;
                 }
             }
             else
