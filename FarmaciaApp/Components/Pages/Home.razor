@@ -3,9 +3,12 @@
 
 <h1>Consulta de Datos</h1>
 
-<div>
-    <label for="idConsulta">ID de Cliente:</label>
-    <input @bind="idConsulta" id="idConsulta" type="text" />
+<div class="container">
+    <label for="idConsulta"><h5>ID de Cliente: </h5></label>
+    <input @bind="idConsulta" id="idConsulta" class="decorated-input" type="text" />
+</div>
+<br />
+<div class="container">
     <button @onclick="ConsultarDatos">Consultar</button>
 </div>
 
@@ -13,7 +16,7 @@
 
 @if (clienteDatos == null && string.IsNullOrEmpty(idConsulta))
 {
-    <h3>Ingrese un ID para consultar información.</h3>
+    <h3 style="text-align: center;">Ingrese un ID para consultar información.</h3>
 }
 else if (nocli)
 {
@@ -41,9 +44,9 @@ else if (clienteDatos != null)
                 </div>
                 <div class="mb-3">
                     <label>Ingrese su dosis:</label>
-                    <InputText @bind-Value="dosis" class="form-control" />
+                    <InputText @bind-Value="dosis" class="form-control decorated-input" />
                 </div>
-                <Button Color="ButtonColor.Primary" @onclick="AgregarClienteM"> Agregar </Button>
+                <button @onclick="AgregarClienteM"> Agregar </button>
                 <Button Color="ButtonColor.Secondary" @onclick="ToggleSwitch"> Cancelar </Button>
             }
         </div>
@@ -63,12 +66,12 @@ else if (clienteDatos != null)
                     {
                         if(cm.idmedicamento == m.idmedicamento)
                         {
-                            <div style="display: flex;">
-                                <div style="padding-right: 15px; ">
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                                <div style="padding-right: 15px;">
                                     <h5>@m.marca - @m.descripcion</h5>
                                     <h5>@cm.dosis</h5>
                                 </div>
-                                <Button Color="ButtonColor.Danger" @onclick="() => EliminarClienteM(cm)"> Eliminar </Button>
+                                <button class="button-danger" @onclick="() => EliminarClienteM(cm)">Eliminar</button>
                             </div>
                             <br />
                         }

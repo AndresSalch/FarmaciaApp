@@ -8,74 +8,91 @@
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Identificación</th>
-                <th>Nombre</th>
-                <th>Fecha de Nacimiento</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cliente in listC)
-            {
-                <tr>
-                    <td>@cliente.identificacion</td>
-                    <td>@cliente.nombre</td>
-                    <td>@cliente.fechanacimiento.ToShortDateString()</td>
-                    <td>@cliente.telefono</td>
-                    <td>@cliente.email</td>
-                    <td>@cliente.estado</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => Edit(cliente)">Editar</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(cliente)">Eliminar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <RadzenDataGrid TItem="cClienteFarmacia" Data="@listC" ColumnWidth="200px">
+        <Columns>
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="identificacion" Title="Identificación" />
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="nombre" Title="Nombre" />
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="fechanacimiento" Title="Fecha de Nacimiento">
+                <Template Context="cliente">
+                    @cliente.fechanacimiento.ToString("dd-MM-yyyy")
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="telefono" Title="Teléfono" />
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="email" Title="Email" />
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Property="estado" Title="Estado" />
+            <RadzenDataGridColumn TItem="cClienteFarmacia" Context="cliente">
+                <Template Context="cliente">
+                    <button class="btn btn-warning btn-sm" @onclick="() => Edit(cliente)">Editar</button>
+                    <ConfirmDialog @ref="dialog" />
+                    <button class="btn btn-danger btn-sm" @onclick="() => ShowConfirmationAsync(cliente)">Eliminar</button>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
 }
 
 <hr />
 <h4>@(clienteEditar.identificacion == 0 ? "Agregar Cliente" : "Editar Cliente")</h4>
-
+<div class="form-container">
 <EditForm Model="nuevoCliente" OnValidSubmit="@(clienteEditar.identificacion == 0 ? AgregarCliente : ActualizarCliente)">
-    <div>
-        <label>Cédula:</label>
-        <InputText @bind-Value="newid" class="form-control" />
-    </div>
-    <div>
-        <label>Nombre:</label>
-        <InputText @bind-Value="nuevoCliente.nombre" class="form-control" />
-    </div>
-    <div>
-        <label>Fecha de Nacimiento:</label>
-        <InputDate @bind-Value="nuevoCliente.fechanacimiento" class="form-control" />
-    </div>
-    <div>
-        <label>Teléfono:</label>
-        <InputText @bind-Value="nuevoCliente.telefono" class="form-control" />
-    </div>
-    <div>
-        <label>Email:</label>
-        <InputText @bind-Value="nuevoCliente.email" class="form-control" />
-    </div>
-    <div>
-        <label>Estado:</label>
-        <InputText @bind-Value="nuevoCliente.estado" class="form-control" />
-    </div>
+    @if (IsEditMode())
+    {
+        <div>
+            <label>Cédula:</label>
+            <span>@clienteEditar.identificacion</span>
+        </div>
+        <div>
+            <label>Nombre:</label>
+            <InputText @bind-Value="clienteEditar.nombre" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Fecha de Nacimiento:</label>
+            <InputDate @bind-Value="clienteEditar.fechanacimiento" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Teléfono:</label>
+            <InputText @bind-Value="clienteEditar.telefono" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Email:</label>
+            <InputText @bind-Value="clienteEditar.email" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Estado:</label>
+            <InputText @bind-Value="clienteEditar.estado" class="form-control decorated-input" />
+        </div>
+    }else{
+        <div>
+            <label>Cédula:</label>
+            <InputText @bind-Value="newid" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Nombre:</label>
+            <InputText @bind-Value="nuevoCliente.nombre" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Fecha de Nacimiento:</label>
+            <InputDate @bind-Value="nuevoCliente.fechanacimiento" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Teléfono:</label>
+            <InputText @bind-Value="nuevoCliente.telefono" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Email:</label>
+            <InputText @bind-Value="nuevoCliente.email" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Estado:</label>
+            <InputText @bind-Value="nuevoCliente.estado" class="form-control decorated-input" />
+        </div>
+    }
     <button type="submit" class="btn btn-success btn-lg">Guardar</button>
     <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
 </EditForm>
+</div>
 
-@if (!string.IsNullOrEmpty(respuesta))
-{
-    <div class="alert alert-info mt-3">@respuesta</div>
-}
+
 
 @if (respuesta == "Exito")
 {
@@ -115,16 +132,21 @@ else if (respuesta == null)
     private IEnumerable<cClienteFarmacia> listC = default!;
     private IEnumerable<cClienteMedicamento> listCM = default!;
     private IEnumerable<cMedicamento> listM = default!;
-    private string? respuesta = "Aqui registra si sucede algo"; // por si pasa algo
     private cClienteFarmacia clienteAEliminar = new();
     private bool showDialog = false;
     private ConfirmDialog dialog = default!;
+    private string? respuesta = string.Empty;
     private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
     private string newid = string.Empty;
 
     private void ReloadPage()
     {
         _navigationManager.Refresh();
+    }
+
+    private bool IsEditMode()
+    {
+        return clienteEditar.identificacion != 0; 
     }
 
     protected override async Task OnInitializedAsync()

@@ -28,31 +28,50 @@ else
 <hr />
 <h4>@(medicamentoEditar.idmedicamento == 0 ? "Agregar Medicamento" : "Editar Medicamento")</h4>
 
+<div class="form-container">
 <EditForm Model="nuevoMedicamento" OnValidSubmit="@(medicamentoEditar.idmedicamento == 0 ? AgregarMedicamento : ActualizarMedicamento)">
-    <div>
-        <label>Descripción:</label>
-        <InputText @bind-Value="nuevoMedicamento.descripcion" class="form-control" />
-    </div>
-    <div>
-        <label>Presentación:</label>
-        <InputText @bind-Value="nuevoMedicamento.presentacion" class="form-control" />
-    </div>
-    <div>
-        <label>Marca:</label>
-        <InputText @bind-Value="nuevoMedicamento.marca" class="form-control" />
-    </div>
-    <div>
-        <label>Estado:</label>
-        <InputText @bind-Value="nuevoMedicamento.estado" class="form-control" />
-    </div>
+    @if (IsEditMode())
+    {
+        <div>
+            <label>Descripción:</label>
+            <InputText @bind-Value="medicamentoEditar.descripcion" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Presentación:</label>
+            <InputText @bind-Value="medicamentoEditar.presentacion" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Marca:</label>
+            <InputText @bind-Value="medicamentoEditar.marca" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Estado:</label>
+            <InputText @bind-Value="medicamentoEditar.estado" class="form-control decorated-input" />
+        </div>
+    }
+    else
+    {
+        <div>
+            <label>Descripción:</label>
+            <InputText @bind-Value="nuevoMedicamento.descripcion" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Presentación:</label>
+            <InputText @bind-Value="nuevoMedicamento.presentacion" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Marca:</label>
+            <InputText @bind-Value="nuevoMedicamento.marca" class="form-control decorated-input" />
+        </div>
+        <div>
+            <label>Estado:</label>
+            <InputText @bind-Value="nuevoMedicamento.estado" class="form-control decorated-input" />
+        </div>
+    }
     <button type="submit" class="btn btn-success btn-lg">Guardar</button>
     <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
 </EditForm>
-
-@if (!string.IsNullOrEmpty(respuesta))
-{
-    <div class="alert alert-info mt-3">@respuesta</div>
-}
+</div>
 
 @if (respuesta == "Exito")
 {
@@ -88,7 +107,7 @@ else if (respuesta == null)
 
     private blMedicamento medicamento = new();
     private IEnumerable<cMedicamento> listM = default!;
-    private string? respuesta = "Aquí registra si sucede algo";
+    private string? respuesta = string.Empty;
     private cMedicamento medicamentoAEliminar = new();
     private bool showDialog = false;
     private ConfirmDialog dialog = default!;
@@ -110,6 +129,11 @@ else if (respuesta == null)
             Console.WriteLine($"Error fetching data: {ex.Message}");
         }
     }
+    private bool IsEditMode()
+    {
+        return medicamentoEditar.idmedicamento != 0;
+    }
+
 
     private async Task ShowConfirmationAsync(cMedicamento item)
     {
