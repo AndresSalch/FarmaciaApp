@@ -47,10 +47,22 @@ else
     <div>
         <label>Cédula:</label>
         <InputText @bind-Value="newid" class="form-control" />
+        @if (id)
+        {
+            <div class="invalidform">
+                Cédula inválida
+            </div>
+        }
     </div>
     <div>
         <label>Nombre:</label>
         <InputText @bind-Value="nuevoCliente.nombre" class="form-control" />
+        @if (name)
+        {
+            <div class="invalidform">
+                Nombre inválido
+            </div>
+        }
     </div>
     <div>
         <label>Fecha de Nacimiento:</label>
@@ -59,14 +71,32 @@ else
     <div>
         <label>Teléfono:</label>
         <InputText @bind-Value="nuevoCliente.telefono" class="form-control" />
+        @if (tel)
+        {
+            <div class="invalidform">
+                Teléfono inválido
+            </div>
+        }
     </div>
     <div>
         <label>Email:</label>
         <InputText @bind-Value="nuevoCliente.email" class="form-control" />
+        @if (email)
+        {
+            <div class="invalidform">
+                Email inválido
+            </div>
+        }
     </div>
     <div>
         <label>Estado:</label>
         <InputText @bind-Value="nuevoCliente.estado" class="form-control" />
+        @if (state)
+        {
+            <div class="invalidform">
+                Estado inválido
+            </div>
+        }
     </div>
     <button type="submit" class="btn btn-success btn-lg">Guardar</button>
     <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
@@ -121,6 +151,13 @@ else if (respuesta == null)
     private ConfirmDialog dialog = default!;
     private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
     private string newid = string.Empty;
+    private Checks checks = new();
+
+    private bool id = false;
+    private bool name = false;
+    private bool tel = false;
+    private bool email = false;
+    private bool state = false;
 
     private void ReloadPage()
     {
@@ -165,6 +202,14 @@ else if (respuesta == null)
             await EliminarCliente();
         }
     }
+    private void reset()
+    {
+        id = false;
+        name = false;
+        tel = false;
+        email = false;
+        state = false;
+    }
 
     private cClienteFarmacia nuevoCliente = new();
 
@@ -173,31 +218,72 @@ else if (respuesta == null)
         clienteEditar = data;
     }
 
+    private bool ValidationSeq()
+    {
+        reset();
+        bool isValid = true;
+
+        if (!checks.checkID(newid))
+        {
+            id = true;
+            isValid = false;
+        }
+
+        if (!checks.checkName(nuevoCliente.nombre))
+        {
+            name = true;
+            isValid = false;
+        }
+
+        if (!checks.checkTel(nuevoCliente.telefono))
+        {
+            tel = true;
+            isValid = false;
+        }
+
+        if (!checks.checkEmail(nuevoCliente.email))
+        {
+            email = true;
+            isValid = false;
+        }
+
+        if (!checks.checkName(nuevoCliente.estado))
+        {
+            state = true;
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     private async Task AgregarCliente()
     {
-        try
+        if (ValidationSeq())
         {
-            nuevoCliente.identificacion = int.Parse(newid);
-            respuesta = await cliente.postModel(nuevoCliente);
-            if (!string.IsNullOrEmpty(respuesta))
+            try
             {
-                // Muestra la notificación de éxito
-                notificacionVisible = true;
-                ReloadPage();
-                Console.WriteLine("Cliente agregado exitosamente.");
+                nuevoCliente.identificacion = int.Parse(newid);
+                respuesta = await cliente.postModel(nuevoCliente);
+                if (!string.IsNullOrEmpty(respuesta))
+                {
+                    // Muestra la notificación de éxito
+                    notificacionVisible = true;
+                    ReloadPage();
+                    Console.WriteLine("Cliente agregado exitosamente.");
+                }
+                else
+                {
+                    // Error handling
+                    Console.WriteLine("Hubo un error al agregar el cliente.");
+                    respuesta = null;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Error handling
-                Console.WriteLine("Hubo un error al agregar el cliente.");
+                // Handle exception
+                Console.WriteLine($"Error: {ex.Message}");
                 respuesta = null;
             }
-        }
-        catch (Exception ex)
-        {
-            // Handle exception
-            Console.WriteLine($"Error: {ex.Message}");
-            respuesta = null;
         }
     }
 
@@ -205,18 +291,21 @@ else if (respuesta == null)
 
     private async Task ActualizarCliente()
     {
-        var respuesta = await cliente.putModel(clienteEditar);
-        if (!string.IsNullOrEmpty(respuesta))
+        if (ValidationSeq())
         {
-            // Mensaje de éxito o redirección
-            Console.WriteLine("Cliente actualizado exitosamente.");
-            clienteEditar = new cClienteFarmacia();
-            ReloadPage();
-        }
-        else
-        {
-            // Manejo de error
-            Console.WriteLine("Hubo un error al actualizar el cliente.");
+            var respuesta = await cliente.putModel(clienteEditar);
+            if (!string.IsNullOrEmpty(respuesta))
+            {
+                // Mensaje de éxito o redirección
+                Console.WriteLine("Cliente actualizado exitosamente.");
+                clienteEditar = new cClienteFarmacia();
+                ReloadPage();
+            }
+            else
+            {
+                // Manejo de error
+                Console.WriteLine("Hubo un error al actualizar el cliente.");
+            }
         }
     }
 

@@ -6,6 +6,10 @@ a, .btn-link {
     color: #006bb7;
 }
 
+.invalidform{
+    color: red;
+}
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
