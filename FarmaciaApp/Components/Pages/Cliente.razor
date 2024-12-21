@@ -8,7 +8,7 @@
 }
 else
 {
-        <RadzenDataGrid TItem="cClienteFarmacia" Data="@listC" ColumnWidth="200px">
+    <RadzenDataGrid TItem="cClienteFarmacia" Data="@listC" ColumnWidth="200px">
         <Columns>
             <RadzenDataGridColumn TItem="cClienteFarmacia" Property="identificacion" Title="Identificación" />
             <RadzenDataGridColumn TItem="cClienteFarmacia" Property="nombre" Title="Nombre" />
@@ -34,62 +34,116 @@ else
 <hr />
 <h4>@(clienteEditar.identificacion == 0 ? "Agregar Cliente" : "Editar Cliente")</h4>
 <div class="form-container">
-<EditForm Model="nuevoCliente" OnValidSubmit="@(clienteEditar.identificacion == 0 ? AgregarCliente : ActualizarCliente)">
-    @if (IsEditMode())
-    {
-        <div>
-            <label>Cédula:</label>
-            <span>@clienteEditar.identificacion</span>
-        </div>
-        <div>
-            <label>Nombre:</label>
-            <InputText @bind-Value="clienteEditar.nombre" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Fecha de Nacimiento:</label>
-            <InputDate @bind-Value="clienteEditar.fechanacimiento" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Teléfono:</label>
-            <InputText @bind-Value="clienteEditar.telefono" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Email:</label>
-            <InputText @bind-Value="clienteEditar.email" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Estado:</label>
-            <InputText @bind-Value="clienteEditar.estado" class="form-control decorated-input" />
-        </div>
-    }else{
-        <div>
-            <label>Cédula:</label>
-            <InputText @bind-Value="newid" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Nombre:</label>
-            <InputText @bind-Value="nuevoCliente.nombre" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Fecha de Nacimiento:</label>
-            <InputDate @bind-Value="nuevoCliente.fechanacimiento" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Teléfono:</label>
-            <InputText @bind-Value="nuevoCliente.telefono" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Email:</label>
-            <InputText @bind-Value="nuevoCliente.email" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Estado:</label>
-            <InputText @bind-Value="nuevoCliente.estado" class="form-control decorated-input" />
-        </div>
-    }
-    <button type="submit" class="btn btn-success btn-lg">Guardar</button>
-    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-</EditForm>
+    <EditForm Model="nuevoCliente" OnValidSubmit="@(clienteEditar.identificacion == 0 ? AgregarCliente : ActualizarCliente)">
+        @if (IsEditMode())
+        {
+            <div>
+                <label>Cédula:</label>
+                <span>@clienteEditar.identificacion</span>
+            </div>
+            <div>
+                <label>Nombre:</label>
+                <InputText @bind-Value="clienteEditar.nombre" class="form-control decorated-input" />
+                @if (name)
+                {
+                    <div class="invalidform">
+                        Nombre inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Fecha de Nacimiento:</label>
+                <InputDate @bind-Value="clienteEditar.fechanacimiento" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Teléfono:</label>
+                <InputText @bind-Value="clienteEditar.telefono" class="form-control decorated-input" />
+                @if (tel)
+                {
+                    <div class="invalidform">
+                        Telefono inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Email:</label>
+                <InputText @bind-Value="clienteEditar.email" class="form-control decorated-input" />
+                @if (email)
+                {
+                    <div class="invalidform">
+                        Email inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Estado:</label>
+                <InputText @bind-Value="clienteEditar.estado" class="form-control decorated-input" />
+                @if (state)
+                {
+                    <div class="invalidform">
+                        Estado inválido
+                    </div>
+                }
+            </div>
+        }else{
+            <div>
+                <label>Cédula:</label>
+                <InputText @bind-Value="newid" class="form-control decorated-input" />
+                @if (id)
+                {
+                    <div class="invalidform">
+                        Cédula inválida
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Nombre:</label>
+                <InputText @bind-Value="nuevoCliente.nombre" class="form-control decorated-input" />
+                @if (name)
+                {
+                    <div class="invalidform">
+                        Nombre inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Fecha de Nacimiento:</label>
+                <InputDate @bind-Value="nuevoCliente.fechanacimiento" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Teléfono:</label>
+                <InputText @bind-Value="nuevoCliente.telefono" class="form-control decorated-input" />
+                @if (tel)
+                {
+                    <div class="invalidform">
+                        Teléfono inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Email:</label>
+                <InputText @bind-Value="nuevoCliente.email" class="form-control decorated-input" />
+                @if (email)
+                {
+                    <div class="invalidform">
+                        Email inválido
+                    </div>
+                }
+            </div>
+            <div>
+                <label>Estado:</label>
+                <InputText @bind-Value="nuevoCliente.estado" class="form-control decorated-input" />
+                @if (state)
+                {
+                    <div class="invalidform">
+                        Estado inválido
+                    </div>
+                }
+            </div>
+        }
+        <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
 </div>
 
 
@@ -138,7 +192,7 @@ else if (respuesta == null)
     private string? respuesta = string.Empty;
     private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
     private string newid = string.Empty;
-
+    private Checks checks = new();
 
     private bool id = false;
     private bool name = false;
@@ -217,6 +271,38 @@ else if (respuesta == null)
         return isValid;
     }
 
+    private bool ValidationSeqEdit()
+    {
+        reset();
+        bool isValid = true;
+
+        if (!checks.checkName(clienteEditar.nombre))
+        {
+            name = true;
+            isValid = false;
+        }
+
+        if (!checks.checkTel(clienteEditar.telefono))
+        {
+            tel = true;
+            isValid = false;
+        }
+
+        if (!checks.checkEmail(clienteEditar.email))
+        {
+            email = true;
+            isValid = false;
+        }
+
+        if (!checks.checkName(clienteEditar.estado))
+        {
+            state = true;
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     private async Task ShowConfirmationAsync(cClienteFarmacia item)
     {
         var options = new ConfirmDialogOptions
@@ -251,29 +337,32 @@ else if (respuesta == null)
 
     private async Task AgregarCliente()
     {
-        try
+        if (ValidationSeq())
         {
-            nuevoCliente.identificacion = int.Parse(newid);
-            respuesta = await cliente.postModel(nuevoCliente);
-            if (!string.IsNullOrEmpty(respuesta))
+            try
             {
-                // Muestra la notificación de éxito
-                notificacionVisible = true;
-                ReloadPage();
-                Console.WriteLine("Cliente agregado exitosamente.");
+                nuevoCliente.identificacion = int.Parse(newid);
+                respuesta = await cliente.postModel(nuevoCliente);
+                if (!string.IsNullOrEmpty(respuesta))
+                {
+                    // Muestra la notificación de éxito
+                    notificacionVisible = true;
+                    ReloadPage();
+                    Console.WriteLine("Cliente agregado exitosamente.");
+                }
+                else
+                {
+                    // Error handling
+                    Console.WriteLine("Hubo un error al agregar el cliente.");
+                    respuesta = null;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Error handling
-                Console.WriteLine("Hubo un error al agregar el cliente.");
+                // Handle exception
+                Console.WriteLine($"Error: {ex.Message}");
                 respuesta = null;
             }
-        }
-        catch (Exception ex)
-        {
-            // Handle exception
-            Console.WriteLine($"Error: {ex.Message}");
-            respuesta = null;
         }
     }
 
@@ -281,18 +370,21 @@ else if (respuesta == null)
 
     private async Task ActualizarCliente()
     {
-        var respuesta = await cliente.putModel(clienteEditar);
-        if (!string.IsNullOrEmpty(respuesta))
+        if (ValidationSeqEdit())
         {
-            // Mensaje de éxito o redirección
-            Console.WriteLine("Cliente actualizado exitosamente.");
-            clienteEditar = new cClienteFarmacia();
-            ReloadPage();
-        }
-        else
-        {
-            // Manejo de error
-            Console.WriteLine("Hubo un error al actualizar el cliente.");
+            var respuesta = await cliente.putModel(clienteEditar);
+            if (!string.IsNullOrEmpty(respuesta))
+            {
+                // Mensaje de éxito o redirección
+                Console.WriteLine("Cliente actualizado exitosamente.");
+                clienteEditar = new cClienteFarmacia();
+                ReloadPage();
+            }
+            else
+            {
+                // Manejo de error
+                Console.WriteLine("Hubo un error al actualizar el cliente.");
+            }
         }
     }
 
@@ -315,7 +407,7 @@ else if (respuesta == null)
 
     private void Cancelar()
     {
-        // Resetear el formulario o cerrar la página
+        clienteEditar = new();
         Console.WriteLine("Operación cancelada.");
     }
 }

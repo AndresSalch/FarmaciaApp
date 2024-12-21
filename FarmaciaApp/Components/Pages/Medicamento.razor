@@ -29,48 +29,48 @@ else
 <h4>@(medicamentoEditar.idmedicamento == 0 ? "Agregar Medicamento" : "Editar Medicamento")</h4>
 
 <div class="form-container">
-<EditForm Model="nuevoMedicamento" OnValidSubmit="@(medicamentoEditar.idmedicamento == 0 ? AgregarMedicamento : ActualizarMedicamento)">
-    @if (IsEditMode())
-    {
-        <div>
-            <label>Descripción:</label>
-            <InputText @bind-Value="medicamentoEditar.descripcion" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Presentación:</label>
-            <InputText @bind-Value="medicamentoEditar.presentacion" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Marca:</label>
-            <InputText @bind-Value="medicamentoEditar.marca" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Estado:</label>
-            <InputText @bind-Value="medicamentoEditar.estado" class="form-control decorated-input" />
-        </div>
-    }
-    else
-    {
-        <div>
-            <label>Descripción:</label>
-            <InputText @bind-Value="nuevoMedicamento.descripcion" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Presentación:</label>
-            <InputText @bind-Value="nuevoMedicamento.presentacion" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Marca:</label>
-            <InputText @bind-Value="nuevoMedicamento.marca" class="form-control decorated-input" />
-        </div>
-        <div>
-            <label>Estado:</label>
-            <InputText @bind-Value="nuevoMedicamento.estado" class="form-control decorated-input" />
-        </div>
-    }
-    <button type="submit" class="btn btn-success btn-lg">Guardar</button>
-    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-</EditForm>
+    <EditForm Model="nuevoMedicamento" OnValidSubmit="@(medicamentoEditar.idmedicamento == 0 ? AgregarMedicamento : ActualizarMedicamento)">
+        @if (IsEditMode())
+        {
+            <div>
+                <label>Descripción:</label>
+                <InputText @bind-Value="medicamentoEditar.descripcion" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Presentación:</label>
+                <InputText @bind-Value="medicamentoEditar.presentacion" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Marca:</label>
+                <InputText @bind-Value="medicamentoEditar.marca" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Estado:</label>
+                <InputText @bind-Value="medicamentoEditar.estado" class="form-control decorated-input" />
+            </div>
+        }
+        else
+        {
+            <div>
+                <label>Descripción:</label>
+                <InputText @bind-Value="nuevoMedicamento.descripcion" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Presentación:</label>
+                <InputText @bind-Value="nuevoMedicamento.presentacion" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Marca:</label>
+                <InputText @bind-Value="nuevoMedicamento.marca" class="form-control decorated-input" />
+            </div>
+            <div>
+                <label>Estado:</label>
+                <InputText @bind-Value="nuevoMedicamento.estado" class="form-control decorated-input" />
+            </div>
+        }
+        <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
 </div>
 
 @if (respuesta == "Exito")
@@ -225,7 +225,7 @@ else if (respuesta == null)
 
     private void Cancelar()
     {
-        // Resetear el formulario o cerrar la página
+        medicamentoEditar = new();
         Console.WriteLine("Operación cancelada.");
     }
 }

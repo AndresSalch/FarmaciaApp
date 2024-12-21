@@ -14,13 +14,16 @@
 
 <br />
 
-@if (clienteDatos == null && string.IsNullOrEmpty(idConsulta))
+@if(!valid){
+    <h3 style="text-align: center; color: red;">Cedula Inválida.</h3>
+}
+else if (clienteDatos == null && string.IsNullOrEmpty(idConsulta))
 {
     <h3 style="text-align: center;">Ingrese un ID para consultar información.</h3>
 }
 else if (nocli)
 {
-    <h3>No se encontró información para el ID ingresado.</h3>
+    <h3 style="text-align: center;">No se encontró información para el ID ingresado.</h3>
 }
 else if (clienteDatos != null)
 {
@@ -90,6 +93,8 @@ else if (clienteDatos != null)
     private blClienteMedicamento clienteM = new();
     private blMedicamento medicamento = new();
 
+    private Checks checks = new();
+
     private string idConsulta = string.Empty;
     private string dosis = string.Empty;
     private cClienteFarmacia clienteDatos = default!;
@@ -99,6 +104,7 @@ else if (clienteDatos != null)
     private IEnumerable<cMedicamento> medicamentoDatos = Enumerable.Empty<cMedicamento>();
     private bool agree = false;
     private bool nocli = false;
+    private bool valid = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,44 +166,53 @@ else if (clienteDatos != null)
 
     private async Task ConsultarDatos()
     {
-        try
+        valid = true;
+
+    if (checks.checkID(idConsulta))
         {
-            nocli = false;
-
-            if (int.TryParse(idConsulta, out int idParsed))
+            try
             {
-                // Consulta los datos de cliente por ID
-                clienteDatos = (await cliente.getModel()).FirstOrDefault(c => c.identificacion == idParsed);
+                nocli = false;
 
-                if (clienteDatos != null)
+                if (int.TryParse(idConsulta, out int idParsed))
                 {
-                    // Consulta los datos de cliente medicamento relacionados con el cliente
-                    clienteMedicamentoDatos = (await clienteM.getModel()).Where(cm => cm.identificacion == idParsed);
+                    // Consulta los datos de cliente por ID
+                    clienteDatos = (await cliente.getModel()).FirstOrDefault(c => c.identificacion == idParsed);
 
-                    // Filtrar medicamentos asociados a las recetas encontradas
-                    var medicamentoIds = clienteMedicamentoDatos.Select(cm => cm.idmedicamento);
-                    medicamentoAll = await medicamento.getModel();
-                    medicamentoDatos = medicamentoAll.Where(m => medicamentoIds.Contains(m.idmedicamento));
+                    if (clienteDatos != null)
+                    {
+                        // Consulta los datos de cliente medicamento relacionados con el cliente
+                        clienteMedicamentoDatos = (await clienteM.getModel()).Where(cm => cm.identificacion == idParsed);
+
+                        // Filtrar medicamentos asociados a las recetas encontradas
+                        var medicamentoIds = clienteMedicamentoDatos.Select(cm => cm.idmedicamento);
+                        medicamentoAll = await medicamento.getModel();
+                        medicamentoDatos = medicamentoAll.Where(m => medicamentoIds.Contains(m.idmedicamento));
+                    }
+                    else
+                    {
+                        // Si no se encuentra el cliente, limpiar los datos
+                        clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
+                        medicamentoDatos = Enumerable.Empty<cMedicamento>();
+                        nocli = true;
+                    }
                 }
                 else
                 {
-                    // Si no se encuentra el cliente, limpiar los datos
+                    Console.WriteLine("El ID ingresado no es válido.");
+                    clienteDatos = null;
                     clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
                     medicamentoDatos = Enumerable.Empty<cMedicamento>();
-                    nocli = true;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("El ID ingresado no es válido.");
-                clienteDatos = null;
-                clienteMedicamentoDatos = Enumerable.Empty<cClienteMedicamento>();
-                medicamentoDatos = Enumerable.Empty<cMedicamento>();
+                Console.WriteLine($"Error durante la consulta: {ex.Message}");
             }
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine($"Error durante la consulta: {ex.Message}");
+            valid = false;
         }
     }
 
