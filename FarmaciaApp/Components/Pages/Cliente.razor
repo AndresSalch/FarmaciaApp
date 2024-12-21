@@ -139,6 +139,13 @@ else if (respuesta == null)
     private bool notificacionVisible = false; // Controlar la visibilidad de la notificación
     private string newid = string.Empty;
 
+
+    private bool id = false;
+    private bool name = false;
+    private bool tel = false;
+    private bool email = false;
+    private bool state = false;
+
     private void ReloadPage()
     {
         _navigationManager.Refresh();
@@ -161,6 +168,53 @@ else if (respuesta == null)
         {
             Console.WriteLine($"Error fetching data: {ex.Message}");
         }
+    }
+
+    private void reset()
+    {
+        id = false;
+        name = false;
+        tel = false;
+        email = false;
+        state = false;
+    }
+
+    private bool ValidationSeq()
+    {
+        reset();
+        bool isValid = true;
+
+        if (!checks.checkID(newid))
+        {
+            id = true;
+            isValid = false;
+        }
+
+        if (!checks.checkName(nuevoCliente.nombre))
+        {
+            name = true;
+            isValid = false;
+        }
+
+        if (!checks.checkTel(nuevoCliente.telefono))
+        {
+            tel = true;
+            isValid = false;
+        }
+
+        if (!checks.checkEmail(nuevoCliente.email))
+        {
+            email = true;
+            isValid = false;
+        }
+
+        if (!checks.checkName(nuevoCliente.estado))
+        {
+            state = true;
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     private async Task ShowConfirmationAsync(cClienteFarmacia item)
