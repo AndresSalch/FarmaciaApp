@@ -1,48 +1,50 @@
-
 # FarmaciaApp
 
-FarmaciaApp is a comprehensive application designed to manage pharmacy operations. This project is structured into multiple layers including Business Logic Layer (BLL), Data Layer, Shared services, and a Web API.
-## Getting Started
+FarmaciaApp es una aplicación integral diseñada para gestionar las operaciones de una farmacia. Este proyecto está estructurado en múltiples capas, incluyendo la Capa de Lógica de Negocio (BLL), la Capa de Datos, Servicios Compartidos y una API Web.
 
-### Prerequisites
+## Empezando
+
+### Requisitos Previos
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or [Visual Studio Code](https://code.visualstudio.com/)
+- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) o [Visual Studio Code](https://code.visualstudio.com/)
 
-### Installation
+### Instalación
 
-1. Clone the repository:
+1. Clona el repositorio:
     ```sh
     git clone https://github.com/yourusername/FarmaciaApp.git
     cd FarmaciaApp
     ```
 
-2. Restore the dependencies:
+2. Restaura las dependencias:
     ```sh
     dotnet restore
     ```
 
-### Building the Project
+### Compilando el Proyecto
 
-To build the project, run the following command in the root directory:
+Para compilar el proyecto, ejecuta el siguiente comando en el directorio raíz:
 ```sh
 dotnet build
 ```
-### Running the Application
+### Ejecutando la Aplicación
 
-To run the application, navigate to the FarmaciaApp directory and use the following command:
+Para ejecutar la aplicación, navega al directorio de FarmaciaApp y usa el siguiente comando:
 
 ```sh
 dotnet run
 ```
-## Project Layers
+## Capas del Proyecto
 
-BLL (Business Logic Layer): Contains the business logic of the application.
-DataLayer: Manages data access and storage.
-FarmaciaApp: The main application project containing the UI and main logic.
-Shared: Contains shared models and services used across different layers.
-WebAPI: Provides API endpoints for the application.
+BLL (Business Logic Layer): Contiene la lógica de negocio de la aplicación.
+DataLayer: Gestiona el acceso y almacenamiento de datos.
+FarmaciaApp: El proyecto principal de la aplicación que contiene la interfaz de usuario y la lógica principal.
+Shared: Contiene modelos y servicios compartidos usados en diferentes capas.
+WebAPI: Proporciona los endpoints de la API para la aplicación.
+
+---
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+FarmaciaApp © 2024 by Herberth Andrés Alfaro Vega is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
 
